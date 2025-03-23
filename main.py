@@ -5,10 +5,21 @@ from player import Player
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot
+import os
+from explosion import Explosion
+
 
 
 def main():
+
     pygame.init()
+    pygame.font.init()
+
+    score = 0
+    score_increment = 10
+
+    lives = 5
+
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
 
@@ -16,11 +27,15 @@ def main():
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
+    hits = pygame.sprite.groupcollide(shots, asteroids, True, False)
 
+    Explosion.containers = (drawable, updatable)
     Asteroid.containers = (asteroids, updatable, drawable)
     Shot.containers = (shots, updatable, drawable)
     AsteroidField.containers = updatable
+    print("About to create asteroid field")
     asteroid_field = AsteroidField()
+    print("Asteroid field created")
 
     Player.containers = (updatable, drawable)
 
@@ -28,34 +43,66 @@ def main():
 
     dt = 0
 
-    while True:
+    running = True
+    while running:
+        font = pygame.font.Font(None, 36)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_q and not player.alive:
+                running = False
+            
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_r and not player.alive:
+                main()
                 return
 
-        updatable.update(dt)
+        if player.alive:
+            updatable.update(dt)
 
-        for asteroid in asteroids:
-            if asteroid.collides_with(player):
-                print("Game over!")
-                sys.exit()
-
-        for shot in shots:
             for asteroid in asteroids:
-                if shot.collides_with(asteroid):
-                    shot.kill()
-                    asteroid.split()
-
-
+                if asteroid.collides_with(player):
+                    Explosion(asteroid.position.x, asteroid.position.y)
+                    lives -= 1
+                    asteroid.kill()
+                    if lives == 0:
+                        print("Game over!")
+                        player.alive = False
+                        break
 
         screen.fill("black")
+        drawable.draw(screen)
 
-        for obj in drawable:
-            obj.draw(screen)
+
+        if not player.alive:
+            gameover = font.render("Press R to Respawn \n or Q to Quit", False, (255, 255, 255))
+            rect = gameover.get_rect()
+            rect.center = screen.get_rect().center
+            screen.blit(gameover, rect)
+
+        
+        for shot in shots.copy():
+            hit_asteroids = pygame.sprite.spritecollide(
+            shot,
+            asteroids,
+            False,
+            pygame.sprite.collide_circle
+        )
+
+            for asteroid in hit_asteroids:
+                Explosion(asteroid.position.x, asteroid.position.y)
+                score += score_increment
+                shot.kill()
+                asteroid.kill()
+                asteroid.split()
+                break
+
+        score_text = font.render(f'Score: {score}', True, (255, 255, 255))
+        lives_text = font.render(f'Lives: {lives}', True, (255, 255, 255))
+        screen.blit(score_text, (10, 10))
+        screen.blit(lives_text, (10, 40))
 
         pygame.display.flip()
-
-        # limit the framerate to 60 FPS
         dt = clock.tick(60) / 1000
 
 
