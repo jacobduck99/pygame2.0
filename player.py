@@ -41,6 +41,9 @@ class Player(CircleShape):
             self.movement_timer = 0
 
 
+        self.wrap_position(SCREEN_WIDTH, SCREEN_HEIGHT)
+
+
         # Draw triangle into image using local coords
         self.image.fill((0,0,0,0))
         # Convert world points to surface-local
@@ -59,6 +62,12 @@ class Player(CircleShape):
 
     def rotate(self, dt):
         self.rotation += PLAYER_TURN_SPEED * dt
+
+
+    def wrap_position(self, SCREEN_WIDTH, SCREEN_HEIGHT):
+        self.position.x %= SCREEN_WIDTH
+        self.position.y %= SCREEN_HEIGHT
+
 
     def move(self, dt):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
