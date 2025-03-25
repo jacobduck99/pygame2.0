@@ -10,7 +10,7 @@ class Explosion(CircleShape):
         super().__init__(x, y, radius=0)
 
         if not Explosion.frames:
-            path = os.path.join("assets", "explosions", "explosion.png")
+            path = os.path.join("assets", "images", "explosion.png")
             img = pygame.image.load(path).convert_alpha()
             # Directly scale the full image down — skip cropping
             small = pygame.transform.smoothscale(img, (64, 64))

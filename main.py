@@ -1,5 +1,5 @@
 import sys
-import pygame
+import pygame 
 from constants import *
 from player import Player
 from asteroid import Asteroid
@@ -22,6 +22,9 @@ def main():
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
+
+    background_image = pygame.image.load('assets/images/tesla_bg.jpg').convert()
+    background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
@@ -70,9 +73,13 @@ def main():
                         player.alive = False
                         break
 
+        screen.blit(background_image, (0, 0))
+
+        drawable.draw(screen)
+        '''                  
         screen.fill("black")
         drawable.draw(screen)
-
+        '''
 
         if not player.alive:
             gameover = font.render("Press R to Respawn \n or Q to Quit", False, (255, 255, 255))

@@ -8,16 +8,12 @@ class Asteroid(CircleShape):
     def __init__(self, x, y, radius):
         super().__init__(x, y, radius)
 
-        self.image = pygame.Surface((self.radius*2, self.radius*2), pygame.SRCALPHA)
-        pygame.draw.circle(self.image, (255,255,255), (self.radius, self.radius), self.radius, 2)
+        self.image = pygame.image.load('assets/images/elon musk.png').convert_alpha()
+# Scale the image to the desired size
+        self.image = pygame.transform.scale(self.image, (self.radius*2, self.radius*2))
+# Get the rectangle for positioning the image
         self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
-
-        self.rect = pygame.Rect(
-        self.position.x - self.radius,
-        self.position.y - self.radius,
-        self.radius * 2,
-        self.radius * 2
-)   
+   
 
     def draw(self, screen):
         pygame.draw.circle(screen, "white", self.position, self.radius, 2)

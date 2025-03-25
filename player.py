@@ -8,6 +8,10 @@ class Player(CircleShape):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.shoot_timer = 0
+        self.movement_timer = 0
+        self.boost_active = False
+        self.boost_timer = 0
+        self.boost_cooldown = 0
 
         # Create a transparent square exactly big enough for the ship
         self.image = pygame.Surface((self.radius*2, self.radius*2), pygame.SRCALPHA)
@@ -23,6 +27,7 @@ class Player(CircleShape):
 
     def update(self, dt):
         # Movement + rotation
+
         self.shoot_timer = max(0, self.shoot_timer - dt)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP] or keys[pygame.K_w]: self.move(dt)
@@ -30,6 +35,11 @@ class Player(CircleShape):
         if keys[pygame.K_LEFT] or keys[pygame.K_a]: self.rotate(-dt)
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]: self.rotate(dt)
         if keys[pygame.K_SPACE]: self.shoot()
+
+        keys = pygame.key.get_pressed()
+        if not (keys[pygame.K_UP] or keys[pygame.K_w] or keys[pygame.K_DOWN] or keys[pygame.K_s]):
+            self.movement_timer = 0
+
 
         # Draw triangle into image using local coords
         self.image.fill((0,0,0,0))
@@ -52,4 +62,26 @@ class Player(CircleShape):
 
     def move(self, dt):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        self.position += forward * PLAYER_SPEED * dt
+    # Always accumulate dt when moving
+        self.movement_timer += dt
+
+        if self.boost_active:
+            self.boost_timer += dt
+            self.position += forward * PLAYER_EXTRA_SPEED * dt
+
+            if self.boost_timer >= BOOST_DURATION:
+                self.boost_active = False
+                self.boost_timer = 0
+                self.boost_cooldown = 3
+                self.movement_timer = 0
+        else:
+            if self.boost_cooldown > 0:
+                self.boost_cooldown -= dt
+                self.position += forward * PLAYER_SPEED * dt
+            else:
+            # Not boosting and no cooldown: check if it's time to boost
+                if self.movement_timer >= 2:
+                    self.boost_active = True        # Trigger boost
+                    self.position += forward * PLAYER_EXTRA_SPEED * dt
+                else:
+                    self.position += forward * PLAYER_SPEED * dt
