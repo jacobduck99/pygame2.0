@@ -7,6 +7,7 @@ from asteroidfield import AsteroidField
 from shot import Shot
 import os
 from explosion import Explosion
+from engine_flame import EngineFlame
 
 
 
@@ -32,14 +33,14 @@ def main():
     shots = pygame.sprite.Group()
     hits = pygame.sprite.groupcollide(shots, asteroids, True, False)
 
+
+    EngineFlame.containers = (drawable, updatable)
     Explosion.containers = (drawable, updatable)
     Asteroid.containers = (asteroids, updatable, drawable)
     Shot.containers = (shots, updatable, drawable)
     AsteroidField.containers = updatable
-    print("About to create asteroid field")
     asteroid_field = AsteroidField()
-    print("Asteroid field created")
-
+    
     Player.containers = (updatable, drawable)
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
@@ -76,10 +77,8 @@ def main():
         screen.blit(background_image, (0, 0))
 
         drawable.draw(screen)
-        '''                  
-        screen.fill("black")
-        drawable.draw(screen)
-        '''
+
+        screen.blit(player.image, player.rect)
 
         if not player.alive:
             gameover = font.render("Press R to Respawn \n or Q to Quit", False, (255, 255, 255))
